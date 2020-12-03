@@ -8,45 +8,45 @@ class RAIIThread{
         RAIIThread() = default;
 
         template<class Function, class... Args>
-        explicit RAIIThread(Function&& F, Args... args) noexcept : m_thread(F, args...){}
+        explicit RAIIThread(Function&& F, Args... args) noexcept : thread_(F, args...){}
 
-        RAIIThread(RAIIThread&& other) noexcept : m_thread(std::move(other.m_thread)) {}
+        RAIIThread(RAIIThread&& other) noexcept : thread_(std::move(other.thread_)) {}
 
         /* Thread does not have a copy constructor */
         RAIIThread(const RAIIThread& t) = delete;
 
         ~RAIIThread(){
-            if(m_thread.joinable()){
-                m_thread.join();
+            if(thread_.joinable()){
+                thread_.join();
             }
         }
 
         constexpr void join() {
-            m_thread.join();
+            thread_.join();
         }
 
         constexpr void detach() {
-            m_thread.detach();
+            thread_.detach();
         }
 
         inline bool joinable() const noexcept {
-            return m_thread.joinable();
+            return thread_.joinable();
         }
 
         [[nodiscard]] inline std::thread::id get_id() const noexcept {
-            return m_thread.get_id();
+            return thread_.get_id();
         }
 
         inline auto native_handle() {
-            return m_thread.native_handle();
+            return thread_.native_handle();
         }
 
         constexpr void swap(RAIIThread& other) noexcept{
-            m_thread.swap(other.m_thread);
+            thread_.swap(other.thread_);
         }
 
         inline RAIIThread& operator=(RAIIThread&& other) noexcept {
-            m_thread = std::move(other.m_thread);
+            thread_ = std::move(other.thread_);
             return *this;
         }
 
@@ -54,7 +54,7 @@ class RAIIThread{
         RAIIThread& operator=(const RAIIThread&) = delete;
 
     private:
-        std::thread m_thread;
+        std::thread thread_;
 };
 
 #endif //RAIITHREAD_H
